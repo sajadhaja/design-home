@@ -4,3 +4,6 @@
 #Personal documents
 d2r-interiors/*
 prestige/*
+
+#3d Artifacts
+*/node_modules/*
