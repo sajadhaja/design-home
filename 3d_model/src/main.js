@@ -1037,15 +1037,34 @@ function updateHUDInfo(viewName) {
   if (!v) return;
   const titleEl = document.getElementById('hud-title');
   const descEl = document.getElementById('hud-desc');
+  const miniRoomEl = document.getElementById('mini-room-name');
   if (titleEl) titleEl.innerText = v.title || '3D Concept Viewer';
   if (descEl) descEl.innerText = v.desc || '';
+  if (miniRoomEl) miniRoomEl.innerText = v.title?.split(' ')[0] || viewName;
+}
+
+function toggleHUD(forceState) {
+  const hud = document.getElementById('hud');
+  const toggleBtn = document.getElementById('btn-toggle-hud');
+  if (!hud) return;
+  const isMin = typeof forceState === 'boolean' ? forceState : !hud.classList.contains('minimized');
+  hud.classList.toggle('minimized', isMin);
+  if (toggleBtn) {
+    toggleBtn.innerText = isMin ? '+' : '−';
+    toggleBtn.title = isMin ? 'Expand Menu (M)' : 'Minimize Menu (M)';
+  }
 }
 
 function updateTourUI() {
   const playBtn = document.getElementById('btn-play-tour');
+  const miniPlayBtn = document.getElementById('btn-mini-play');
   if (playBtn) {
     playBtn.innerHTML = tourState.running ? '⏸ Pause Tour' : '▶ Play Cinematic Tour';
     playBtn.classList.toggle('active', tourState.running);
+  }
+  if (miniPlayBtn) {
+    miniPlayBtn.innerHTML = tourState.running ? '⏸' : '▶ Tour';
+    miniPlayBtn.classList.toggle('active', tourState.running);
   }
 }
 
@@ -1088,10 +1107,24 @@ document.querySelectorAll('[data-lighting]').forEach((b) => {
 });
 
 document.getElementById('btn-play-tour')?.addEventListener('click', toggleTour);
+document.getElementById('btn-mini-play')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleTour();
+});
 document.getElementById('btn-next-step')?.addEventListener('click', nextTourStep);
 document.getElementById('btn-prev-step')?.addEventListener('click', prevTourStep);
 document.getElementById('btn-orbit')?.addEventListener('click', toggleAutoOrbit);
 document.getElementById('btn-snap')?.addEventListener('click', captureScreenshot);
+document.getElementById('btn-toggle-hud')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleHUD();
+});
+document.getElementById('hud')?.addEventListener('click', (e) => {
+  const hud = document.getElementById('hud');
+  if (hud && hud.classList.contains('minimized')) {
+    toggleHUD(false);
+  }
+});
 
 const speedSelect = document.getElementById('speed-select');
 if (speedSelect) {
@@ -1103,7 +1136,9 @@ if (speedSelect) {
 
 // Keyboard shortcuts
 window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
+  if (e.code === 'KeyM' || e.code === 'KeyH') {
+    toggleHUD();
+  } else if (e.code === 'Space') {
     e.preventDefault();
     toggleTour();
   } else if (e.code === 'ArrowRight') {
